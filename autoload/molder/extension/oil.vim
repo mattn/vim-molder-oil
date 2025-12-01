@@ -44,7 +44,7 @@ function! molder#extension#oil#init() abort
 endfunction
 
 function! s:molder_edit_start() abort
-  let s:idmap = {}
+  "let s:idmap = {}
 
   let l:dir = molder#curdir()
   let l:files = getline(1, '$')
