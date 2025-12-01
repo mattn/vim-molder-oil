@@ -31,7 +31,7 @@ Plug 'mattn/vim-molder-oil'
 
 2. Edit the buffer like normal text:
    - **Rename**: Edit the filename on a line
-   - **Delete**: Delete the line (`:d`)
+   - **Delete**: Delete the line (`:d` or `dd`)
    - **Create file**: Add a new line with the filename
    - **Create directory**: Add a new line with the name ending in `/` or `\`
    - **Move**: Edit the path to include directory separators
