@@ -56,8 +56,6 @@ function! s:molder_edit_start() abort
     call prop_type_add(s:idname, { 'highlight': 'NonText' })
   endif
 
-  "call setline(1, l:files)
-
   " Clear existing text properties
   for l:lnum in range(1, line('$'))
     call prop_clear(l:lnum)
