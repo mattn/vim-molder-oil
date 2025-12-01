@@ -186,12 +186,23 @@ function! s:molder_edit_apply() abort
     return
   endif
 
-  let l:confirm_text = ['Execute the following operations? [y]/[n]', ''] + l:operations
-  let l:result = popup_dialog(l:confirm_text, #{
-        \ title: 'Confirm File Operations',
-        \ filter: 'popup_filter_yesno',
-        \ callback: function('s:execute_operations', [l:lines, l:will_be_deleted])
-        \ })
+  if get(g:, 'molder_oil_confirm_dialog', 1) == 1
+    let l:confirm_text = ['Execute the following operations? [y]/[n]', ''] + l:operations
+    let l:result = popup_dialog(l:confirm_text, #{
+          \ title: 'Confirm File Operations',
+          \ filter: 'popup_filter_yesno',
+          \ callback: function('s:execute_operations', [l:lines, l:will_be_deleted])
+          \ })
+  else
+    for l:operation in l:operations
+      echo l:operation
+    endfor
+    if confirm('Execute the following operations?', "&Yes\n&No", 1) == 1
+      call s:execute_operations(l:lines, l:will_be_deleted, '', 1)
+    else
+      call s:execute_operations(l:lines, l:will_be_deleted, '', 0)
+    endif
+  endif
 endfunction
 
 function! s:execute_operations(lines, will_be_deleted, id, result) abort
