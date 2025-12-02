@@ -20,7 +20,9 @@ function! s:prop_add_line_id(lnum, file) abort
   endif
   let l:id = s:make_id(a:file)
   let l:prop_id = prop_add(a:lnum, 0, {'type':s:idname, 'text':l:id, 'text_align':'right'})
-  let s:idmap[l:prop_id] = {'id': l:id, 'name': a:file}
+  let l:prop = {'id': l:id, 'name': a:file}
+  let s:idmap[l:prop_id] = l:prop
+  return l:prop
 endfunction
 
 function! s:get_line_textprop(lnum) abort
@@ -132,6 +134,11 @@ function! s:molder_edit_apply() abort
     let l:line = l:lines[l:lnum]
 
     let l:prop = s:get_line_textprop(l:lnum+1)
+    if l:prop ==# {'id': '', 'name': ''}
+      if filereadable(l:dir .. l:sep .. l:line) || isdirectory(l:dir .. l:sep .. l:line)
+        continue
+      endif
+    endif
     let l:oldname = l:prop['name']
 
     " new file/directory
@@ -221,6 +228,11 @@ function! s:execute_operations(lines, will_be_deleted, id, result) abort
     let l:line = a:lines[l:lnum]
 
     let l:prop = s:get_line_textprop(l:lnum+1)
+    if l:prop ==# {'id': '', 'name': ''}
+      if filereadable(l:dir .. l:sep .. l:line) || isdirectory(l:dir .. l:sep .. l:line)
+        continue
+      endif
+    endif
     let l:oldname = l:prop['name']
 
     " new file/directory
