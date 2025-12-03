@@ -45,51 +45,11 @@ function! molder#extension#oil#init() abort
   call s:molder_edit_start()
 endfunction
 
-function! s:initialize_properties() abort
-  call prop_remove({'type': s:idname, 'all': 1, 'bufnr': bufnr('%')})
-  let s:idmap = {}
-  let b:molder_oil_known_files = {}
-
-  let l:files = getline(1, '$')
-  for l:lnum in range(len(l:files))
-    if l:files[l:lnum] !~ '^\s*$'
-      let l:prop = s:prop_add_line_id(l:lnum + 1, l:files[l:lnum])
-      let b:molder_oil_known_files[l:prop.name] = l:prop.id
-    endif
-  endfor
-endfunction
-
-function! s:update_properties() abort
-  if get(b:, 'molder_oil_is_updating', 0)
-    return
-  endif
-  let b:molder_oil_is_updating = 1
-
-  try
-    let l:known_files = get(b:, 'molder_oil_known_files', {})
-    if empty(l:known_files)
-      return
-    endif
-
-    call prop_remove({'type': s:idname, 'all': 1, 'bufnr': bufnr('%')})
-    let s:idmap = {}
-
-    let l:lines = getline(1, '$')
-    for l:lnum in range(len(l:lines))
-      let l:line = l:lines[l:lnum]
-      if has_key(l:known_files, l:line)
-        let l:id = l:known_files[l:line]
-        let l:prop_id = prop_add(l:lnum + 1, 0, {'type': s:idname, 'text': l:id, 'text_align': 'right'})
-        let s:idmap[l:prop_id] = {'id': l:id, 'name': l:line}
-      endif
-    endfor
-  finally
-    let b:molder_oil_is_updating = 0
-  endtry
-endfunction
-
 function! s:molder_edit_start() abort
+  "let s:idmap = {}
+
   let l:dir = molder#curdir()
+  let l:files = getline(1, '$')
   let l:sep = has('win32') || has('win64') ? '\' : '/'
 
   setlocal modifiable buftype=acwrite noreadonly
@@ -98,16 +58,18 @@ function! s:molder_edit_start() abort
     call prop_type_add(s:idname, { 'highlight': 'NonText' })
   endif
 
-  call s:initialize_properties()
+  " Clear existing text properties
+  for l:lnum in range(1, line('$'))
+    call prop_clear(l:lnum)
+  endfor
+
+  for l:lnum in range(len(l:files))
+    call s:prop_add_line_id(l:lnum+1, l:files[l:lnum])
+  endfor
 
   augroup molder_edit
     autocmd! * <buffer>
     autocmd BufWriteCmd <buffer> call <SID>molder_edit_apply()
-  augroup END
-
-  augroup molder_oil_handler
-    autocmd! * <buffer>
-    autocmd TextChanged,TextChangedI <buffer> call <SID>update_properties()
   augroup END
 
   setlocal nomodified
