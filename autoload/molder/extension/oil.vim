@@ -48,11 +48,13 @@ endfunction
 function! s:initialize_properties() abort
   call prop_remove({'type': s:idname, 'all': 1, 'bufnr': bufnr('%')})
   let s:idmap = {}
+  let b:molder_oil_known_files = {}
 
   let l:files = getline(1, '$')
   for l:lnum in range(len(l:files))
     if l:files[l:lnum] !~ '^\s*$'
-      call s:prop_add_line_id(l:lnum + 1, l:files[l:lnum])
+      let l:prop = s:prop_add_line_id(l:lnum + 1, l:files[l:lnum])
+      let b:molder_oil_known_files[l:prop.name] = l:prop.id
     endif
   endfor
 endfunction
@@ -64,22 +66,19 @@ function! s:update_properties() abort
   let b:molder_oil_is_updating = 1
 
   try
-    " Create a map of current filenames to their IDs
-    let l:name_to_id = {}
-    for l:prop in values(s:idmap)
-      let l:name_to_id[l:prop.name] = l:prop.id
-    endfor
+    let l:known_files = get(b:, 'molder_oil_known_files', {})
+    if empty(l:known_files)
+      return
+    endif
 
-    " Clear existing properties and the idmap
     call prop_remove({'type': s:idname, 'all': 1, 'bufnr': bufnr('%')})
     let s:idmap = {}
 
-    " Re-apply properties only to existing files
     let l:lines = getline(1, '$')
     for l:lnum in range(len(l:lines))
       let l:line = l:lines[l:lnum]
-      if has_key(l:name_to_id, l:line)
-        let l:id = l:name_to_id[l:line]
+      if has_key(l:known_files, l:line)
+        let l:id = l:known_files[l:line]
         let l:prop_id = prop_add(l:lnum + 1, 0, {'type': s:idname, 'text': l:id, 'text_align': 'right'})
         let s:idmap[l:prop_id] = {'id': l:id, 'name': l:line}
       endif
@@ -112,12 +111,6 @@ function! s:molder_edit_start() abort
   augroup END
 
   setlocal nomodified
-endfunction
-
-function! GetProp() abort
-  let l:lnum = line('.')
-  let l:prop = s:get_line_textprop(l:lnum)
-  return l:prop
 endfunction
 
 function! s:molder_edit_apply() abort
