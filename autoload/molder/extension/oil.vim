@@ -67,7 +67,7 @@ function! s:molder_edit_start() abort
     call s:prop_add_line_id(l:lnum+1, l:files[l:lnum])
   endfor
 
-  augroup molder_edit
+  augroup _molder_oil_
     autocmd! * <buffer>
     autocmd BufWriteCmd <buffer> call <SID>molder_edit_apply()
   augroup END
