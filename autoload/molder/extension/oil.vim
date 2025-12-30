@@ -214,6 +214,11 @@ function! s:execute_operations(lines, will_be_deleted, id, result) abort
     return
   endif
 
+  if !molder#is_local()
+    call molder#error('Oil operations not supported for remote paths')
+    return
+  endif
+
   let l:dir = molder#curdir()
   let l:qf = []
   let l:sep = has('win32') || has('win64') ? '\' : '/'
