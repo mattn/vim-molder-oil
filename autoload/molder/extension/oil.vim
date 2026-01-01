@@ -46,8 +46,6 @@ function! molder#extension#oil#init() abort
 endfunction
 
 function! s:molder_edit_start() abort
-  "let s:idmap = {}
-
   let l:dir = molder#curdir()
   let l:files = getline(1, '$')
   let l:sep = has('win32') || has('win64') ? '\' : '/'
@@ -137,11 +135,7 @@ function! s:molder_edit_apply() abort
 
     " new file/directory
     if l:prop['id'] ==# ''
-      if l:line =~# '[/\\]$'
-        call add(l:operations, 'CREATE ' .. l:line)
-      else
-        call add(l:operations, 'CREATE ' .. l:line)
-      endif
+      call add(l:operations, 'CREATE ' .. l:line)
       continue
     endif
 
